@@ -1,8 +1,6 @@
 #define BLYNK_TEMPLATE_ID "TMPL4m_Cq21Yw"
 #define BLYNK_TEMPLATE_NAME "Food Dispenser"
 #define BLYNK_AUTH_TOKEN "Hnj6uO9huswASQZDjEXZO_jSycmhX71a"
-
-/* Comment this out to disable prints and save space */
 #define BLYNK_PRINT Serial
 
 #include <WiFi.h>
@@ -11,8 +9,6 @@
 #include "HX711.h"
 #include <ESP32Servo.h>
 
-// Your WiFi credentials.
-// Set password to "" for open networks.
 char ssid[] = "MartinRouterKing";
 char pass[] = "girlboss2002";
 
@@ -34,11 +30,9 @@ unsigned long startTime = 0;
 float weight = 0.00;
 float oldWeight = 0.00;
 
-// This function is called every time the Virtual Pin 1 state changes
 BLYNK_WRITE(V1)
 {
-  int value = param.asInt(); // Obtine valoarea curenta a unui canal
-  //Blynk.virtualWrite(V1, value);
+  int value = param.asInt();
   if (value == 1) {
     if (!servoOpened) {
       // Se deschide containerul pentru a cadea mancare
@@ -54,7 +48,6 @@ BLYNK_WRITE(V1)
   }
 }
 
-// This function is called every time the device is connected to the Blynk.Cloud
 BLYNK_CONNECTED()
 {
   Serial.println("Connected");
@@ -77,16 +70,16 @@ void setup()
   Serial.println("Press - or z to decrease calibration factor");
 
   scale.begin(LOADCELL_DT_PIN, LOADCELL_SCK_PIN);
-  // Setează valoarea SCALE folosită pentru a converti datele brute în date ușor de citit (în unități de măsură)
+  // Seteaza valoarea SCALE folosita pentru a converti datele brute in date usor de citit (in unitati de masura)
   scale.set_scale();
-  // Ajustează punctul intern de zero al scalei astfel încât să afișeze zero atunci când nu există nicio greutate pe celula de încărcare
+  // Ajusteaza punctul intern de zero al scalei astfel incat sa afiseze zero atunci cand nu exista nicio greutate pe celula de incarcare
   scale.tare();
 
-  long zero_factor = scale.read_average(); //Get a baseline reading
-  Serial.print("Zero factor: "); //This can be used to remove the need to tare the scale. Useful in permanent scale projects.
+  long zero_factor = scale.read_average();
+  Serial.print("Zero factor: ");
   Serial.println(zero_factor);
-  // Această funcție citește mai multe probe de la celula de încărcare și returnează valoarea medie
-  // Utilizată în timpul configurării pentru a asigura citiri stabile
+  // Aceasta functie citeste mai multe probe de la celula de incarcare si returneaza valoarea medie
+  // Utilizata in timpul configurarii pentru a asigura citiri stabile
   scale.read_average();
 
   pinMode(SERVO_PIN, OUTPUT);
@@ -107,7 +100,7 @@ void foodDispenser()
 {
   scale.set_scale(calibration_factor); // Ajustarea la factorul de calibrare
   Serial.print("Reading: ");
-  weight = scale.get_units() * 453.60; // Citirea greutății în grame
+  weight = scale.get_units() * 453.60; // Citirea greutatii in grame
 
   if (weight < 0) {
     weight = 0.00;
@@ -140,7 +133,7 @@ void foodDispenser()
     analogWrite(BUZZER_PIN, 128);
     oldWeight = weight;
     servoOpened = true;
-    if (weight - oldWeight >= 100 ) {
+    if (weight - oldWeight >= 100) {
       myServo.write(0);
       Blynk.virtualWrite(V2, 0);    
       digitalWrite(LED_PIN, LOW);
@@ -148,4 +141,3 @@ void foodDispenser()
     }
   }
 }
-
